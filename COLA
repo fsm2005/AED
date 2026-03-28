@@ -1,0 +1,116 @@
+#include <iostream>
+using namespace std;
+
+template<class T, int N = 10>
+struct Cola {
+	int Longitud;
+
+	T* arr;
+	T* head = nullptr;
+	T* tail = nullptr;
+
+	Cola();
+	~Cola();
+
+	bool EstaLleno();
+	bool EstaVacio();
+	bool Push(T valor);
+	bool Pop(T& valor);
+};
+
+template<class T, int N>
+Cola<T, N>::Cola() {
+	Longitud = N;
+	arr = new T[Longitud];
+	head = nullptr;
+	tail = nullptr;
+}
+
+template<class T, int N>
+Cola<T, N>::~Cola() {
+	delete[] arr;
+}
+
+template<class T, int N>
+bool Cola<T, N>::EstaVacio() {
+	if ((head == nullptr) && (tail == nullptr)) { 
+		return true;
+	}
+	else {
+		return false; 
+	}
+
+}
+template<class T, int N>
+bool Cola<T, N>::EstaLleno() {
+
+	if (EstaVacio()) {
+		return false;
+	}
+	else if (tail == head) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+template<class T, int N>
+bool Cola<T, N>::Push(T valor) {
+
+	if (EstaLleno()) { 
+       cout << "Push(" << valor << ") failed: cola llena" << endl;
+		return false;
+	}
+	if (EstaVacio()) { 
+		head = arr;
+		tail = arr;
+	}
+	if (tail == arr + Longitud - 1) { 
+		*tail = valor;
+		tail = arr;
+	}
+	else {
+		*tail = valor;
+		tail++;
+	}
+	return true;
+}
+
+template<class T, int N>
+bool Cola<T, N>::Pop(T& valor) {
+	if (EstaVacio()) { //Si Esta Vacio, No puedo POP
+		return false;
+	}
+
+	// leer el valor actual
+	valor = *head;
+
+	// avanzar head (con wrap)
+	if (head == arr + Longitud - 1)
+		head = arr;
+	else
+		++head;
+
+	// si después de avanzar alcanzamos a tail, la cola queda vacía
+	if (head == tail) {
+		head = nullptr;
+		tail = nullptr;
+	}
+
+	return true;
+}
+
+int main() {
+
+	Cola<int, 3> cola;
+	int e;
+
+	cola.Push(9);
+	cola.Push(8);
+	cola.Push(7);
+
+	cola.Pop(e);
+
+	cola.Push(6);
+
+}
