@@ -1,97 +1,107 @@
 #include <iostream>
 using namespace std;
 
+// Cola circular simple basada en punteros dentro de un arreglo fijo.
+// Comentarios explicativos añadidos para cada parte importante.
+
 template<class T, int N = 10>
 struct Cola {
+	// capacidad del buffer (número máximo de elementos)
 	int Longitud;
 
+	// puntero al bloque de memoria que almacena los elementos
 	T* arr;
-	T* head = nullptr;
-	T* tail = nullptr;
 
-	Cola();
-	~Cola();
+	// punteros de lectura(esquina frontal) y escritura(final)
+	// cuando ambos son nullptr la cola está vacía
+	T* head = nullptr; // apunta al siguiente elemento a extraer (si no está vacía)
+	T* tail = nullptr; // apunta a la posición donde se escribirá el siguiente elemento
 
-	bool EstaLleno();
-	bool EstaVacio();
-	bool Push(T valor);
-	bool Pop(T& valor);
+	Cola();   // inicializa el buffer
+	~Cola();  // libera memoria
+
+	bool EstaLleno(); // true si no hay espacio para más elementos
+	bool EstaVacio(); // true si no hay elementos
+	bool Push(T valor); // inserta un elemento (si hay espacio)
+	bool Pop(T& valor); // extrae el elemento frontal (si hay alguno)
 };
 
 template<class T, int N>
 Cola<T, N>::Cola() {
+	// reservar arreglo con la longitud fija de la plantilla
 	Longitud = N;
 	arr = new T[Longitud];
+	// empezar vacía: head y tail no apuntan a ninguna posición válida
 	head = nullptr;
 	tail = nullptr;
 }
 
 template<class T, int N>
 Cola<T, N>::~Cola() {
+	// liberar memoria al destruir la cola
 	delete[] arr;
 }
 
 template<class T, int N>
 bool Cola<T, N>::EstaVacio() {
-	if ((head == nullptr) && (tail == nullptr)) { 
-		return true;
-	}
-	else {
-		return false; 
-	}
-
+	// la implementación utiliza nullptr para representar cola vacía
+	return (head == nullptr) && (tail == nullptr);
 }
 template<class T, int N>
 bool Cola<T, N>::EstaLleno() {
-
-	if (EstaVacio()) {
+	// La cola se considera llena cuando head y tail apuntan a la misma
+	// posición y la cola no está vacía. Por eso comprobamos primero
+	// que no esté vacía.
+	if (EstaVacio())
 		return false;
-	}
-	else if (tail == head) {
-		return true;
-	}
-	else {
-		return false;
-	}
+	return tail == head;
 }
 template<class T, int N>
 bool Cola<T, N>::Push(T valor) {
-
-	if (EstaLleno()) { 
-       cout << "Push(" << valor << ") failed: cola llena" << endl;
+	// Comprueba si hay espacio
+	if (EstaLleno()) {
+		cout << "Push(" << valor << ") failed: cola llena" << endl;
 		return false;
 	}
-	if (EstaVacio()) { 
+
+	// Si la cola estaba vacía, inicializamos head y tail al inicio del arreglo
+	if (EstaVacio()) {
 		head = arr;
 		tail = arr;
 	}
-	if (tail == arr + Longitud - 1) { 
-		*tail = valor;
-		tail = arr;
+
+	// Escribimos el valor en la posición indicada por tail
+	*tail = valor;
+
+	// Avanzamos tail: si estaba en la última posición del arreglo
+	// lo envolvemos (wrap) al inicio para mantener comportamiento circular
+	if (tail == arr + Longitud - 1) {
+		tail = arr; // envolver al inicio
 	}
 	else {
-		*tail = valor;
-		tail++;
+		++tail; // avanzar al siguiente elemento
 	}
+
 	return true;
 }
 
 template<class T, int N>
 bool Cola<T, N>::Pop(T& valor) {
-	if (EstaVacio()) { //Si Esta Vacio, No puedo POP
+	// Si la cola está vacía no hay nada que extraer
+	if (EstaVacio())
 		return false;
-	}
 
-	// leer el valor actual
+	// Leer el elemento apuntado por head
 	valor = *head;
 
-	// avanzar head (con wrap)
+	// Avanzar head; si llega al final del arreglo, envolver al inicio
 	if (head == arr + Longitud - 1)
 		head = arr;
 	else
 		++head;
 
-	// si después de avanzar alcanzamos a tail, la cola queda vacía
+	// Si tras avanzar head coincide con tail, significa que ya no hay
+	// elementos: representamos la cola vacía poniendo ambos punteros en nullptr
 	if (head == tail) {
 		head = nullptr;
 		tail = nullptr;
